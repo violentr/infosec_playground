@@ -1,0 +1,4 @@
+OWASP
+https://www.owasp.org/index.php/Command_Injection
+compile source code
+$ gcc -0 otput_file source_file.c
