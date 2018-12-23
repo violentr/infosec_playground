@@ -1,17 +1,17 @@
 #!/bin/bash
 
-outFile1=network.txt
-outFile2=live_hosts.txt
+network=network.txt
+hosts=live_hosts.txt
+green='\033[0;32m'
+esc='\033[0m'
 
 printf "Scanning network $1 please standy\n"
+nmap $1 -n -vvv -sn | grep report | awk '{print $5}' > $network
 
-nmap $1 -n -vvv -sn | grep report | awk '{print $5}' > $outFile1
+printf "${green}[+] Network scan completed - [ $network ] created ${esc}\n"
 
-printf "[+] Network scan completed - [ $outFile1 ] was created\n"
+printf "${green}[+] File created - [ $hosts ]  created ${esc}\n"
+printf "Found live hosts:\n\n"
 
-printf "Found live hosts:\n"
-
-printf "[+] File - [ $outFile2 ]  was created\n"
-
-arp -an | sed '/\(incomplete\)/d' | tee $outFile2
+arp -an | sed '/\(incomplete\)/d' | tee $hosts
 #arp -a -n | awk '{print $2 $4}' | sed '/\(incomplete\)/d'
