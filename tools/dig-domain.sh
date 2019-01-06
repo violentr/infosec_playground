@@ -24,29 +24,35 @@ getGeoLocation(){
   printf "\n"
   echo -e "GEO ip location: \n"
   curl $hackerTargetApi=$domain |tee output.txt
+
   coordinates=($(cat output.txt | tail -2 | awk {'print $2'} | cut -d':' -f1))
   gps="$googleMaps/@${coordinates[0]},${coordinates[1]},10z"
   printf "\n"
 }
 
+getDnsInfo(){
+    selectDns
 
-if [ $# -eq 0 ]
-  then
-    echo "No arguments supplied"
-    echo "usage: ./dig-domain your_domain"
-  else
-    echo "Supplied Param: $1"
     echo -e "\n"
     echo -e "--- Get Dns information ---"
     dig $domain ANY +noall +answer
 
     #More obscurely, for the present anyway, you can also poll for a host’s IPv6 address using the AAAA option.
     dig $domain AAAA +short
+}
 
-    selectDns
-    domainTransfer
-    getGeoLocation
+main(){
+  getDnsInfo
+  domainTransfer
+  getGeoLocation
+}
 
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+    echo "usage: ./dig-domain your_domain"
+  else
+    main
     echo "Opening Google maps with defined coordinates"
     open /Applications/Google\ Chrome.app $gps
     printf "\n"
