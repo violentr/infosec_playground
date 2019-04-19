@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#make sure this file is sourced, so functions could be used globally
+
 urlencode() {
   s="${1//'%'/%25}"
   s="${s//' '/%20}"
@@ -18,3 +20,7 @@ urlencode() {
   s="${s//']'/%5D}"
   printf %s "$s";echo
 }
+
+#urlencode(){
+#  ruby -e "require 'erb'; puts ERB::Util.url_encode(ARGV[0])" $1
+#}
