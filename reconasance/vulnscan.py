@@ -2,6 +2,7 @@
 
 import os, sys
 import socket
+from termcolor import colored
 
 ip = "172.16.122.131"
 ports = [21,22,23,25,80,443,110]
@@ -12,20 +13,25 @@ def get_banner(ip, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((ip, port))
         return sock.recv(1024)
+
     except socket.timeout:
-        print("Time is up")
+        print(colored("Time is up", "red"))
     except ConnectionRefusedError:
         pass
         #print("Connection was refused")
     except KeyboardInterrupt:
-        print("Crl + C was pressed")
+        print(colored("Crl + C was pressed", 'red'))
         exit(0)
 
 def checkVuln(banner, filename):
-    with open(filename) as f:
-        for line in f.readlines():
-            if line.strip("\n") in str(banner):
-                print("Server is vulnerable to: %s" % str(banner))
+    try:
+        banner = banner.decode('UTF-8')
+        with open(filename) as f:
+            for line in f.readlines():
+                if line.strip("\n") in banner:
+                    print("Server is vulnerable to: %s" % banner)
+    except UnicodeDecodeError:
+        print(colored("can't decode using UTF-8", 'red'))
 
 def main():
     global ip, ports
@@ -33,9 +39,9 @@ def main():
     if len(sys.argv) == 2:
         filename = sys.argv[1]
         if not os.path.isfile(filename):
-            print("[-] File %s does not exist" % filename)
+            print(colored("[-] File %s does not exist" % filename, 'red'))
         if not os.access(filename, os.R_OK):
-            print("[-] Access is denied!")
+            print(colored("[-] Access is denied!", 'red'))
             exit(0)
     else:
         print("Usage: %s <vulns filename>" % sys.argv[0])
