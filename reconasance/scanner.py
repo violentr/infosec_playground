@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#usage  ./scanner.py -H 172.16.122.131 -p 22,80,135
 import socket
 from socket import gethostbyname, gethostbyaddr, setdefaulttimeout
 import sys
@@ -7,6 +7,7 @@ import optparse
 from termcolor import colored
 from threading import Thread
 
+threads = []
 # tcp - socket.SOCK_STREAM
 # udp - socket.SOCK_DGRAM
 
@@ -38,6 +39,7 @@ def port_scan(host, ports):
 
     for port in ports:
         t = Thread(target=conn_scan, args=(ip, int(port)))
+        threads.append(t)
         t.start()
 
 def program_options():
@@ -45,6 +47,10 @@ def program_options():
     parser.add_option('-H', dest='target_host', type='string', help='define host to scan')
     parser.add_option('-p', dest='target_port', type='string', help='define port separated by coma')
     return parser
+
+def cleanup():
+    global threads
+    return [thread.join() for thread in threads]
 
 def main():
     parser = program_options()
@@ -59,3 +65,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    cleanup()
