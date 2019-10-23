@@ -18,8 +18,8 @@ handle_file
 for email_domain in `cat $filename`
   do
     domain=`echo $email_domain |cut -d"@" -f2`
-    check_result=`dig mx $domain |grep MX |wc -l`
-    if (( $check_result > 1 )); then
+    check_result=`dig MX $domain | grep "^[^;].*MX | wc -l`
+    if (( $check_result > 0 )); then
       #this is probably legit email
       echo "$email_domain" | tee -a $output_file
     fi
