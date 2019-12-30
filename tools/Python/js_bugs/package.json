@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "js-yaml": "3.13.1",
-    "jquery": "1.11.3"
+    "jquery": "3.4.1"
   },
   "devDependencies": {}
 }
