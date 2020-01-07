@@ -8,7 +8,7 @@ import socket, time, sys, os
 ip_address = "192.168.0.200"
 port = 8080
 CHUNK = 1024
-PATH = os.environ('HOME') + '/Desktop'
+PATH = os.environ['HOME'] + '/Desktop'
 
 def transfer(conn, command):
     conn.send(command)
