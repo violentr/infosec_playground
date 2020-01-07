@@ -27,6 +27,13 @@ def transfer(conn, command):
             break
         f.write(data)
 
+def print_usage():
+  print("""
+  Available c2c commands:
+   - exit (terminate the connection)
+   - restart (restart current connection)
+   - grab (transfer file)
+   - cd (navigate to dir) """)
 
 def create_socket():
   global ip_address, port
@@ -35,6 +42,7 @@ def create_socket():
   s.bind((ip_address, port));
   s.listen(1)
   print("\nNew socket was created")
+  print_usage()
   return s
 
 def connect():
