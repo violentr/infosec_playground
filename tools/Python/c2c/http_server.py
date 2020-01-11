@@ -16,6 +16,7 @@ class MyHandler(http_server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
+        self.print_bot_commands()
         self.wfile.write(command.encode())
 
     def do_POST(self):
@@ -37,6 +38,12 @@ class MyHandler(http_server.BaseHTTPRequestHandler):
         strings  = match[0].split('"')
         attr, filename = [x for x in strings if x]
         return filename
+
+    @staticmethod
+    def print_bot_commands():
+        print("""\n\tAvailable c2c commands:
+         - exit (terminate bot)
+         - grab (transfer remote file)\n""")
 
     @staticmethod
     def check_input():
