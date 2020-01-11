@@ -30,9 +30,10 @@ class MyHandler(http_server.BaseHTTPRequestHandler):
                 f.write(response)
 
 def extract_filename(text):
-    matches = re.split('\r\n', text)
-    match = re.search("(filename=\"\w.*)$" , matches[1])
-    attr, filename, _ = match[0].split('"')
+    headers = re.split('\r\n', text)
+    match = re.search("(filename=\".*\w+\.\w.*$)" , headers[1])
+    strings  = match[0].split('"')
+    attr, filename = [x for x in strings if x]
     return filename
 
 def check_input():
