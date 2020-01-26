@@ -24,6 +24,11 @@ if [ ! -d $proj_path ]; then
   cd $proj_path
  else
    cd $proj_path
+   echo -e "[+] Your current project has these files\n"
+   for i in $(ls -A)
+   do
+     echo -e "\t $i"
+   done
 fi
 
 nmap_scan(){
