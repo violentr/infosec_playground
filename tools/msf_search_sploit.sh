@@ -4,7 +4,7 @@
 # It will be saved to the file, use this file as input to
 # check and validate that exploit exists. This script uses
 # kali linux tool - searchsploit
-# Results of the search will be saved to the file
+# Results of findings will be saved to the file
 #
 #!/usr/bin/env bash
 default_settings=false
@@ -12,16 +12,30 @@ default_settings=false
 proj_dir="msf_check"
 proj_path="$(pwd)/$proj_dir"
 
-mkdir -p $proj_path
-echo -e "[+] Project directory created: $proj_path"
-cd $proj_path
-echo -e "[+] Current working dir set to $proj_path"
+
 cleanup(){
-  [ -d $proj_path ] && echo "Cleaning old results" && $(rm -rf $proj_path)
+  [ -d $proj_path ] && echo "[+] Cleaning old results" && $(rm -rf $proj_path)
 }
 
+if [ ! -d $proj_path ]; then
+  mkdir -p $proj_path
+  echo -e "[+] Project directory created: $proj_path"
+  echo -e "[+] Current working dir set to $proj_path"
+  cd $proj_path
+ else
+   cd $proj_path
+   echo -e "[+] Your current project has these files\n"
+   for i in $(ls -A)
+   do
+     echo -e "\t $i"
+   done
+fi
+
 nmap_scan(){
-  nmap -T4 -sV -vvv $ip_address2scan -o "$result"
+  #nmap -Pn --top-ports 1000 -sU --stats-every 3m --max-retries 1 -T3 $ip_address2scan | tee $result
+  #nmap -nvv -Pn -sSV -p 22,80,111,139,443,1024 --version-intensity 9 -A $ip_address2scan | tee $result
+
+  nmap -T4 -p- -sV -vvv $ip_address2scan | tee "$result"
 }
 
 set_defaults(){
@@ -47,8 +61,8 @@ scan_ip(){
 
 search_vuln_file(){
   if [ $default_settings = false ]; then
-    read -p "[+] Please provide your input file:" input
-    read -p "[+] Please provide your output file:" output
+    read -p "[+] Please provide your input file: " input
+    read -p "[+] Please provide your output file: " output
     output=$(pwd)/$output
     input=$(pwd)/$input
   fi
@@ -57,7 +71,7 @@ search_vuln_file(){
   do
     echo "Checking exploit for: $line"
     length="$(searchsploit -w $line | wc -l)"
-    if (( length > 4));then
+    if (( $length > 4 ));then
       echo -e "\n[+] Result for searching exploit: $line\n" | tee -a $output
       searchsploit -t --color -w $line | tee -a $output
     fi
@@ -74,6 +88,7 @@ do
        "Scan IP address")
            echo -e "\nYou chose $REPLY, scan individual ip address:"
            scan_ip
+           exit
            ;;
        "Check vulns")
            echo -e "\nYou chose $REPLY, search for vulnerabilities"
@@ -86,6 +101,7 @@ do
        "Clean old results")
            echo -e "\nYou chose $REPLY, old results will be deleted"
            cleanup
+           exit
            ;;
        "Quit")
            cd ..
@@ -94,3 +110,4 @@ do
        *) echo -e l"\n Invalid option $REPLY";;
    esac
 done
+
