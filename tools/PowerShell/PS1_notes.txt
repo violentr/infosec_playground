@@ -58,3 +58,10 @@ powershell -c "Get-Command -Module Recon"
 
 import module
 powershell -c "Import-Module Recon"
+
+
+Offensive security with powershell
+- PowerSploit
+- Nishang
+- Invoke-Obfuscation
+- Posh-SecMod
