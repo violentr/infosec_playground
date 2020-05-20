@@ -52,3 +52,9 @@ powershell -c "Get-WmiObject -list "*service*" "
 
 Select win32_service and pull data from it.
 powershell -c "Get-WmiObject win32_service | Format-Table name, startname, startmode, pathname"
+
+Check for available commands in the module
+powershell -c "Get-Command -Module Recon"
+
+import module
+powershell -c "Import-Module Recon"
