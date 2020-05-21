@@ -1,0 +1,48 @@
+powershell.exe -ExecutionPolicy Bypass .\script.ps1
+powershell.exe -ep Bypass .\script.ps1
+powershell.exe -ep by .\script.ps1
+
+powershell.exe -ExecutionPolicy Unrestricted .\script.ps1
+
+powershell.exe -WindowStyle Hidden .\script.ps1
+powershell.exe -W h .\script.ps1
+powershell.exe -Wi hi .\script.ps1
+
+powershell.exe -Command Get-Process
+powershell.exe -Command " & {Get-EventLog -Logname security}"
+
+powershell.exe -EncodedCommand $encodedCommand
+powershell.exe -enco $encodedCommand
+powershell.exe -ec $encodedCommand
+
+powershell -c "Get-Help Get-Process -Examples"
+powershell -c "Update-Help"
+
+powershell -c "Get-Command -Name *Firewall*"
+
+List all available aliases
+powershell -c "Get-Alias"
+powershell -c "Get-Alias | Format-List *"
+powershell -c "Get-Alias -Definion Get-ChildItem"
+
+powershell -c "Get-Content C:\Users\user\Documents\passwords.txt"
+
+Works as grep in linux
+powershell -c "Get-Command | Select-String Select*"
+
+select all running services like "win"
+powershell -c "ps | ? {$_.ProcessName -match 'win'}"
+powershell -c "ps | where {$_.ProcessName -match 'win'}"
+powershell -c "ps | Where-Object {$_.ProcessName -match 'win'}"
+
+powershell -c "Get-Service "s*" | Sort-Object -Property Name -Unique"
+
+Two conditions
+powershell -c "Get-Service "s*" | { $_.Status -eq "Running" -and $_.Canshutdown -eq "True"}
+
+
+Work with modules
+powershell -c "Get-Module -ListAvailable"
+powershell -c "$env:PsModulePath"
+powershell -c "Import-Module PowerSploit"
+powershell -c "Get-Command -Module PowerSploit"
