@@ -9,7 +9,8 @@ from threading import Thread
 
 search_pattern = ["worldpay"]
 port = 443
-socket.setdefaulttimeout(5)
+timeout = 5
+socket.setdefaulttimeout(timeout)
 filtered = False
 hostname = sys.argv[1]
 filename = f"{hostname}-output.txt"
@@ -35,10 +36,13 @@ def grep_certificate_subject(ip_string):
         return msg
 
 def make_request(url):
+    global timeout
     try:
-        r = requests.get(url, verify=False)
+        r = requests.get(url, verify=False, timeout=timeout)
         if r.ok:
             return r
+    except requests.exceptions.ConnectionError as e:
+        print(f"[!] Request: No response")
     except Exception as e:
         print(f"[!] Request: {e}")
 
