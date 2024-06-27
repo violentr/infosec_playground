@@ -24,7 +24,7 @@ AKAMAI_SERVERS = [
 '23.48.165.162', '23.48.165.163'
 ]
 
-CLOUDFRLARE_SERVERS = [
+CLOUDFLARE_SERVERS = [
 '104.16.10.2', '104.16.11.2', '104.16.131.29', '104.16.146.231', '104.16.147.231',
 '104.16.153.82', '104.16.179.78', '104.16.180.238', '104.16.181.238', '104.16.204.249', '104.16.205.249',
 '104.16.230.137', '104.16.231.137', '104.16.50.20', '104.16.51.20', '104.16.87.94', '104.17.155.102',
@@ -67,6 +67,14 @@ def make_request(url):
     except Exception as e:
         print(f"[!] Request: Error {e}")
     
+def identify_by_ip(ip_string):
+    if ip_string in AKAMAI_SERVERS:
+        return "AKAMAI IP"
+    elif ip_string in CLOUDFLARE_SERVERS:
+        return "CLOUDFLARE IP"
+    else:
+        return "Not behind AKAMAI or CLOUDFLARE" 
+
 def process():
     try:
         res = dns.resolver.Resolver(configure=False)
@@ -77,19 +85,19 @@ def process():
         q = res.resolve(hostname, "A")
     
         for rdata in q:
-            print(rdata.address)
-            if not rdata.address in AKAMAI_SERVERS and not rdata.address in CLOUDFRLARE_SERVERS:
+            print(f"{rdata.address} | {hostname} | {identify_by_ip(rdata.address)}")
+            if not rdata.address in AKAMAI_SERVERS and not rdata.address in CLOUDFLARE_SERVERS:
                 response = make_request(url)
                 response = response.status_code if hasattr(response, "status_code") else "No response"
                 data = f"{url} | {rdata.address} | {response} \n"
                 write_tofile(data)
     
     except dns.resolver.NXDOMAIN:
-        print("[!] DNS: IP was not found")
+        print(f"[!] DNS: [{hostname}] IP was not found")
     except dns.resolver.LifetimeTimeout as e:
-        print(f"[!] DNS: Error {e}")
+        print(f"[!] DNS: [{hostname} ]Error {e}")
     except (dns.resolver.NoAnswer, dns.resolver.NoNameservers) as e:
-        print(f"[!] DNS: No answer")
+        print(f"[!] DNS: [{hostname}] No answer ")
    
 def main():
     process()
