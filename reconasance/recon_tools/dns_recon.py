@@ -98,6 +98,8 @@ def process():
         print(f"[!] DNS: [{hostname} ]Error {e}")
     except (dns.resolver.NoAnswer, dns.resolver.NoNameservers) as e:
         print(f"[!] DNS: [{hostname}] No answer ")
+    except Exception as e:
+        print("[!] Something went wrong ! {e}")
    
 def main():
     process()
