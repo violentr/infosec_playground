@@ -41,11 +41,10 @@ def run_individual_scan(hostname):
     except Exception as e:
         print(f'[!] Timeout can\'t connect to {hostname}')
 
-def run__range_scan(hostname):
+def run_range_scan(hostname):
     for i in range(1, 255):
         hostname = ".".join(hostname.split(".")[:3])
         hostname = f'{hostname}.{i}'
-        print("Hostname", hostname)
         run_individual_scan(hostname)
     
 def write_tofile(data):
@@ -58,8 +57,8 @@ def write_tofile(data):
 
 def process():
     global hostname
-    #run_individual_scan()
-    run__range_scan(hostname)
+    run_individual_scan(hostname)
+    #run_range_scan(hostname)
 
 def main():
     process()
