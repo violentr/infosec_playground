@@ -1,4 +1,8 @@
 import ssl, sys, re, socket
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from threading import Thread
@@ -22,7 +26,7 @@ def grep_certificate_subject(ip_string):
     certDecoded = x509.load_pem_x509_certificate(str.encode(cert), default_backend)
     cert = format(str(certDecoded.issuer))
     subject = format(str(certDecoded.subject))
-    msg = f'{ip_string} | {subject} \n'
+    msg = f'{ip_string}|{subject}'
     if filtered:
         match = re.search(search_criteria[0], subject)
         if match:
@@ -30,11 +34,24 @@ def grep_certificate_subject(ip_string):
     else:
         return msg
 
+def make_request(url):
+    try:
+        r = requests.get(url, verify=False)
+        if r.ok:
+            return r
+    except Exception as e:
+        print(f"[!] Request: {e}")
+
 def run_individual_scan(hostname):
     try:
         result = grep_certificate_subject(hostname)
-        print(result)
-        write_tofile(result)
+        ip_string = result.split("|")[0].strip()
+        url = f"https://{ip_string}"
+        r = make_request(url)
+        msg = f"{result}|{url}|{r.status_code}\n"
+
+        print(msg)
+        write_tofile(msg)
     except KeyboardInterrupt as e:
         print("[!] Ctrl+C detected, exiting now ..")
         sys.exit(1)
