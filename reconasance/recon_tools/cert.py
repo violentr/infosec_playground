@@ -39,8 +39,7 @@ def make_request(url):
     global timeout
     try:
         r = requests.get(url, verify=False, timeout=timeout)
-        if r.ok:
-            return r
+        return r
     except requests.exceptions.ConnectionError as e:
         print(f"[!] Request: No response")
     except Exception as e:
@@ -60,7 +59,7 @@ def run_individual_scan(hostname):
         print("[!] Ctrl+C detected, exiting now ..")
         sys.exit(1)
     except Exception as e:
-        print(f'[!] Timeout can\'t connect to {hostname}')
+        print(f'[!] Timeout can\'t connect to {hostname} {e}')
 
 def run_range_scan(hostname):
     for i in range(1, 255):
