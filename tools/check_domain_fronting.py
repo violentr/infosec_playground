@@ -8,7 +8,7 @@ from requests.exceptions import SSLError
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Usage:
-# python check_domain_fronting | tee -a output.txt
+# python check_domain_fronting your_input_file | tee -a output.txt
 # cat output.txt | grep \[+\]
 #
 def resolve_host(domain):
@@ -37,10 +37,8 @@ def https_server(domain):
 
 def check_domain_fronting(domain):
     if not (resolve_host(domain)):
-        print("[-] Host {0} was not resolved".format(domain))
         return False
-
-    if (https_server(domain)):
+    elif (https_server(domain)):
         try:
             headers = {'Host': 'example.com'}
             response = requests.get(f"https://{domain}", headers=headers, timeout=5, verify=False)
@@ -67,6 +65,8 @@ def main():
                         print(f"[+] Domain '{domain}' could potentially be used for domain fronting. \n")
                     else:
                         print(f"[-] Domain '{domain}' cannot be used for domain fronting.\n")
+        except KeyboardInterrupt as e:
+            print("\nCtrl+C detected, stopping the program")
         except FileNotFoundError as e:
             print("[-] File was not found '{0}' !".format(e.filename))
     else:
