@@ -31,6 +31,7 @@ def https_server(domain):
             return  True
     except SSLError as e:
         print(f"SSL certificate validation error occurred: {e.response}")
+        return False
     except requests.exceptions.RequestException as e:
         print(f"HTTPS request failed for domain '{domain}': {e.response}")
         return False
@@ -44,9 +45,10 @@ def check_domain_fronting(domain):
             response = requests.get(f"https://{domain}", headers=headers, timeout=5, verify=False)
             if response.status_code == 200:
                 print(f"Domain '{domain}' allows different host headers.")
+                return True
             else:
                 print(f"Domain '{domain}' returned status code: {response.status_code} for different host header.")
-                return True
+                return False 
         except requests.exceptions.RequestException as e:
             print(f"Request failed for domain '{domain}' with different host header: {e}")
             return False
