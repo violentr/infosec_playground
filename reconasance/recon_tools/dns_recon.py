@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import urllib.parse
 import dns.resolver
@@ -12,7 +13,7 @@ while read -r line;do echo -e "https://$line"; python dns_recon.py https://$line
 """
 filename = "dns_recon_output.txt"
 
-DNS_SERVERS = ['8.8.8.8']
+DNS_SERVERS = ['8.8.8.8', '1.1.1.1']
 
 AKAMAI_SERVERS = [
     '104.94.222.123', '104.94.222.124', '104.94.222.148', '104.94.222.149', '107.162.133.46',
@@ -86,11 +87,10 @@ def process():
         q = res.resolve(hostname, "A")
         for rdata in q:
             print(f"{rdata.address} | {hostname} | {identify_by_ip(rdata.address)}")
-            if rdata.address not in AKAMAI_SERVERS and rdata.address not in CLOUDFLARE_SERVERS:
-                response = make_request(url)
-                response = response.status_code if hasattr(response, "status_code") else "No response"
-                data = f"{url} | {rdata.address} | {response} \n"
-                write_tofile(data)
+            response = make_request(url)
+            response = response.status_code if hasattr(response, "status_code") else "No response"
+            data = f"{url} | {rdata.address} | {identify_by_ip(rdata.address)} | {response} \n"
+            write_tofile(data)
     except dns.resolver.NXDOMAIN:
         print(f"[!] DNS: [{hostname}] IP was not found")
     except dns.resolver.LifetimeTimeout as e:
