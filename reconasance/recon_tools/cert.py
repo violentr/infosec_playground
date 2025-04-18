@@ -51,7 +51,8 @@ def run_individual_scan(hostname):
         ip_string = result.split("|")[0].strip()
         url = f"https://{ip_string}"
         r = make_request(url)
-        msg = f"{result}|{url}|{r.status_code}\n"
+        response = r.status_code if hasattr(r, "status_code") else "No response"
+        msg = f"{result}|{url}|{response}\n"
 
         print(msg)
         write_tofile(msg)
@@ -66,7 +67,7 @@ def run_range_scan(hostname):
         hostname = ".".join(hostname.split(".")[:3])
         hostname = f'{hostname}.{i}'
         run_individual_scan(hostname)
-    
+
 def write_tofile(data):
     global filename
     try:
