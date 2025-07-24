@@ -1,0 +1,15 @@
+{
+  "blacklist": {
+    "mode": "unauth"
+  },
+  "general": {
+    "domain": "",
+    "ipv4": "",
+    "external_ipv4": "",
+    "bind_ipv4": "",
+    "unauth_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "https_port": 443,
+    "dns_port": 53,
+    "autocert": true
+  },
+  "phishlets": {}
