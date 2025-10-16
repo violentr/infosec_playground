@@ -18,6 +18,7 @@ aws sts get-caller-identity --profile [profile]
 ## IAM users
 ```bash
 aws iam list-users --profile [profile]
+aws iam list-users --query 'Users[*].UserName' --output table --profile [profile]
 aws iam list-groups-for-user --user-name [user-name] --profile [profile]
 aws iam list-attached-user-policies --user-name [user-name] --profile [profile]
 ```
@@ -33,6 +34,10 @@ aws iam list-group-policies --group-name [group-name] --profile [profile]
 aws iam list-roles --profile [profile]
 aws iam list-attached-role-policies --role-name [role-name] --profile [profile]
 aws iam list-role-policies --role-name [ role-name] --profile [profile]
+aws iam get role --rolename ec2-role --profile [profile]
+aws iam list-roles --query 'Roles[?contains(RoleName, `crossaccount`) || contains(RoleName, `admin`) || contains(RoleName, `devops`)].{RoleName:RoleName,Arn:Arn}' --output table --profile [profile]
+aws iam list-roles --output json | jq '.Roles[] | select(.RoleName | test("crossaccount|admin|devops"))'
+echo "crossaccount-role admin-role devops-role" | xargs -n1 -I {} aws iam get-role --role-name {} --query 'Role.AssumeRolePolicyDocument.Statement[0].Principal' --output json
 ```
 ## IAM Policies
 ```bash
