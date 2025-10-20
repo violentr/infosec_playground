@@ -5,3 +5,11 @@ curl https://ip-ranges.amazonaws.com/ip-ranges.json | jq -r '.prefixes[] | selec
 # Run tool
 
 $ check_ip_aws_s3.sh your_ip_address
+
+
+# More tools
+- https://github.com/initstring/cloud_enum
+
+```bash
+$ uv run cloud_enum.py -k cwl-metatech --disable-azure --disable-gcp
+```
