@@ -49,3 +49,12 @@ aws iam get-user-policy --user-name [user-name] --policy-name [policy-name] --pr
 aws iam get-group-policy --group-name [group-name] --policy-name [policy-name] --profile [profile]
 aws iam get-role-policy --role-name [role-name] --policy-name [policy-name] --profile [profile]
 ```
+
+
+## Privilege escalation path
+
+```bash
+aws iam list-user-policies --user-name temp-user --profile pwn
+aws iam get-user-policy --user-name temp-user --policy-name test-temp-user --profile pwn
+aws sts assume-role --role-arn arn:aws:iam::107513503799:role/AdminRole --role-session-name MySession
+```
