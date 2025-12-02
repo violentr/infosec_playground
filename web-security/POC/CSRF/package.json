@@ -1,0 +1,19 @@
+{
+  "name": "csrf",
+  "version": "1.0.0",
+  "main": "secure-csrf-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "vulnerable": "node vulnerable-csrf-server.js",
+    "secure": "node secure-csrf-server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.2.1"
+  }
+}

