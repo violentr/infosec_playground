@@ -89,6 +89,16 @@ def process_hardcoded_strings(strings, dex_list, apk):
             print(f"  Method:       {method.get_name()}{method.get_descriptor()}")
             print(f"  Bytecode @:   0x{offset:x}")
 
+def api_permission_usage(a, dx):
+    apilevel = a.get_effective_target_sdk_version()
+    print(f"\n[!] API PERMISSION USAGE (target SDK {apilevel}):")
+
+    for api_method, perms in dx.get_permissions(apilevel):
+        print(f"API: {api_method.full_name}")
+        print(f"  permissions: {perms}")
+        for _, caller, _ in api_method.get_xref_from():
+            print(f"  called from: {caller.full_name}")
+
 def loop_through(subject, collection):
     print(f"\n[+] {subject.upper()}:")
     for item in collection:
@@ -111,6 +121,7 @@ def main():
         a, d, dx = AnalyzeAPK(apk_path)
     print("[+] Package:", a.get_package())
     loop_through("permissions", a.get_permissions())
+    api_permission_usage(a, dx)
     loop_through("activities", a.get_activities())
     loop_through("services", a.get_services())
     loop_through("receivers", a.get_receivers())
