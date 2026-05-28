@@ -61,6 +61,7 @@ def get_source_file(class_analysis):
 
 def process_hardcoded_strings(strings, dex_list, apk):
     keywords = ["api_key", "secret", "password", "token"]
+    package = apk.get_package().split(".")[-1]
     vm_to_dex = {id(vm): name for vm, name in zip(dex_list, apk.get_dex_names())}
 
     for s in strings:
@@ -81,13 +82,13 @@ def process_hardcoded_strings(strings, dex_list, apk):
             dex_file = vm_to_dex.get(id(method_analysis.get_vm()), "unknown.dex")
             java_class = dex_class_to_java(class_name)
             source_file = get_source_file(class_analysis)
-
-            print(f"  DEX file:     {dex_file}")
-            print(f"  Class:        {class_name}  ({java_class})")
-            if source_file:
+            # Only print results for classes in the current package
+            if source_file and package in class_name:
+                print(f"  DEX file:     {dex_file}")
+                print(f"  Class:        {class_name}  ({java_class})")
                 print(f"  Source file:  {source_file}")
-            print(f"  Method:       {method.get_name()}{method.get_descriptor()}")
-            print(f"  Bytecode @:   0x{offset:x}")
+                print(f"  Method:       {method.get_name()}{method.get_descriptor()}")
+                print(f"  Bytecode @:   0x{offset:x}")
 
 def get_list_of_classes(apk, d):
     package = apk.get_package().split(".")[-1]
