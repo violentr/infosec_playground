@@ -89,6 +89,10 @@ def process_hardcoded_strings(strings, dex_list, apk):
             print(f"  Method:       {method.get_name()}{method.get_descriptor()}")
             print(f"  Bytecode @:   0x{offset:x}")
 
+def get_list_of_classes(apk, d):
+    package = apk.get_package().split(".")[-1]
+    return [name for name in d[0].get_classes_names() if package in name]
+
 def api_permission_usage(a, dx):
     apilevel = a.get_effective_target_sdk_version()
     print(f"\n[!] API PERMISSION USAGE (target SDK {apilevel}):")
@@ -129,5 +133,7 @@ def main():
     exported_components(a)
     strings = hardcoded_strings(dx)
     process_hardcoded_strings(strings, d, a)
+    classes = get_list_of_classes(a, d)
+    loop_through("classes", classes)
 
 main()
