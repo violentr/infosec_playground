@@ -90,9 +90,18 @@ def process_hardcoded_strings(strings, dex_list, apk):
                 print(f"  Method:       {method.get_name()}{method.get_descriptor()}")
                 print(f"  Bytecode @:   0x{offset:x}")
 
+
 def get_list_of_classes(apk, d):
-    package = apk.get_package().split(".")[-1]
-    return [name for name in d[0].get_classes_names() if package in name]
+    prefix = "L" + apk.get_package().replace(".", "/") + "/"
+    # Skip classes, not needed for the analysis
+    skip = ("R$", "/R;", "BuildConfig")
+    classes = []
+    for dex in d:
+        for name in dex.get_classes_names():
+            if name.startswith(prefix) and not any(s in name for s in skip):
+                classes.append(name)
+    return classes
+
 
 def api_permission_usage(a, dx):
     apilevel = a.get_effective_target_sdk_version()
