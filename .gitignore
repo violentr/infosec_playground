@@ -1,0 +1,74 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE - IntelliJ / JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - Other
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+logs/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+credentials.json
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Java / Kotlin
+target/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+build/
