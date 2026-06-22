@@ -1,0 +1,6 @@
+{
+  "tools": {
+    "nmap": "nmap -sV -A -p 80,443 {hostname}",
+    "sqlmap": "sqlmap -u https://{hostname}/ --batch --level 3"
+  }
+}
