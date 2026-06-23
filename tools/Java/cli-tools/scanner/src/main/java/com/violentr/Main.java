@@ -14,6 +14,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        // TODO: OPtion for loading tools.json file - PATH
+
         if (args.length != 2) {
             System.out.println("Usage: scanner <tool> <hostname>");
             System.out.println("Tools: nmap, sqlmap, ...");

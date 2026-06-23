@@ -1,5 +1,6 @@
 package src.main.java.com.violentr;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 class ScanTool {
-    private final Map<String, String> toolConfigs;
+    private final Map<String, String[]> toolConfigs;
 
     public ScanTool(String configPath) throws IOException {
         this.toolConfigs = new HashMap<>();
@@ -22,7 +23,12 @@ class ScanTool {
         JSONObject tools = json.getJSONObject("tools");
 
         for (String key : tools.keySet()) {
-            toolConfigs.put(key, tools.getString(key));
+            JSONArray args = tools.getJSONArray(key);
+            String[] command = new String[args.length()];
+            for (int i = 0; i < args.length(); i++) {
+                command[i] = args.getString(i);
+            }
+            toolConfigs.put(key, command);
         }
     }
 
@@ -32,10 +38,13 @@ class ScanTool {
             return;
         }
 
-        String command = toolConfigs.get(toolName).replace("{hostname}", hostname);
-        String[] commandTool = command.split("\\s+");
-        System.out.println("Executing: " + command);
-        executeCommand(commandTool);
+        String[] commandTool = toolConfigs.get(toolName);
+        String[] resolved = new String[commandTool.length];
+        for (int i = 0; i < commandTool.length; i++) {
+            resolved[i] = commandTool[i].replace("{hostname}", hostname);
+        }
+        System.out.println("Executing: " + String.join(" ", resolved));
+        executeCommand(resolved);
     }
 
     private void executeCommand(String[] cmd) {

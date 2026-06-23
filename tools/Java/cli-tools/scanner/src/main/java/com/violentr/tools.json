@@ -1,6 +1,24 @@
 {
   "tools": {
-    "nmap": "nmap -sV -A -p 80,443 {hostname}",
-    "sqlmap": "sqlmap -u https://{hostname}/ --batch --level 3"
+    "ffuf": [
+      "ffuf",
+      "-w", "/Users/admin/Repository/security/SecLists/Discovery/Web-Content/big.txt",
+      "-u", "http://{hostname}/FUZZ",
+      "-H", "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "-x", "http://127.0.0.1:8080",
+      "-r"
+    ],
+    "nmap": [
+      "nmap",
+      "-sV", "-A",
+      "-p", "80,443",
+      "{hostname}"
+    ],
+    "sqlmap": [
+      "sqlmap",
+      "-u", "https://{hostname}/",
+      "--batch",
+      "--level", "3"
+    ]
   }
 }
