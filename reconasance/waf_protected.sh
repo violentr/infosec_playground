@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Coded by violentR
-# Check if IP is protected with CF / AKAMAI etc
+# Check if IP is protected with CF / AKAMAI
 # Install:  httpx is https://github.com/projectdiscovery/httpx
 
 if [[ $# -eq 0 ]]; then
@@ -16,14 +16,12 @@ inputFile="$prefix-input.txt"
 outputFile="$prefix-output.txt"
 
 echo -e "\n Cleanning up previous files .."
-rm $outputFile
-rm $inputFile
+rm $outputFile 2>/dev/null
+rm $inputFile 2>/dev/null
 
 echo -e "\n Preparing data for the look up .."
 
 cat  $file | sort -u | httpx -probe -ip | tee -a $inputFile
-
-#cat $file | httpx -probe | tee -a $outputFile
 
 while read -r host
 do
