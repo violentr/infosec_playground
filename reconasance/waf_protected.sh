@@ -16,10 +16,10 @@ outputFile="$prefix-output_ips.txt"
 file=$1
 
 rm $outputFile 2>/dev/null
-rm WAF-output.txt 2>/dev/null
-rm WAF-real_ips.txt 2>/dev/null
-rm WAF-raw_report.txt 2>/dev/null
-rm WAF-report.txt 2>/dev/null
+rm $prefix-output.txt 2>/dev/null
+rm $prefix-real_ips.txt 2>/dev/null
+rm $prefix-raw_report.txt 2>/dev/null
+rm $prefix-report.txt 2>/dev/null
 
 echo -e "\nSTAGE 1: Checking for public domains"
 
