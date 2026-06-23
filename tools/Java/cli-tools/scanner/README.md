@@ -22,16 +22,35 @@ scanner sqlmap test.example.org
 
 ## Configuration
 
-Commands live in `tools.json`. Use `{hostname}` as a placeholder for the target:
+Commands live in `tools.json`. Each tool is a JSON array of arguments passed directly to the process. Use `{hostname}` as a placeholder for the target in any argument:
 
 ```json
 {
   "tools": {
-    "nmap": "nmap -sV -A -p 80,443 {hostname}",
-    "sqlmap": "sqlmap -u https://{hostname}/ --batch --level 3"
+    "nmap": [
+      "nmap",
+      "-sV", "-A",
+      "-p", "80,443",
+      "{hostname}"
+    ],
+    "sqlmap": [
+      "sqlmap",
+      "-u", "https://{hostname}/",
+      "--batch",
+      "--level", "3"
+    ],
+    "ffuf": [
+      "ffuf",
+      "-w", "/path/to/wordlist",
+      "-u", "http://{hostname}/FUZZ",
+      "-H", "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) ...",
+      "-r"
+    ]
   }
 }
 ```
+
+Each array element is one argument. Values with spaces (such as HTTP headers) stay in a single string — no quoting or escaping needed.
 
 Run the CLI from the directory that contains `tools.json`, or place a copy of the file in your working directory.
 
