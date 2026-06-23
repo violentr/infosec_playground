@@ -52,7 +52,20 @@ Commands live in `tools.json`. Each tool is a JSON array of arguments passed dir
 
 Each array element is one argument. Values with spaces (such as HTTP headers) stay in a single string — no quoting or escaping needed.
 
-Run the CLI from the directory that contains `tools.json`, or place a copy of the file in your working directory.
+By default, the CLI loads `tools.json` from the current working directory. To use a config file elsewhere, pass the **directory** that contains `tools.json` via the `scanner.config` system property:
+
+```bash
+# -D must come before -jar
+java -Dscanner.config="$HOME/Downloads" -jar target/scanner-cli-tool-1.0-SNAPSHOT.jar nmap example.com
+```
+
+This resolves to `$HOME/Downloads/tools.json`. On startup the CLI prints the path it is using:
+
+```
+Config: /Users/you/Downloads/tools.json
+```
+
+If `scanner.config` is not set, the CLI falls back to `./tools.json` in the current directory.
 
 ## Build & Run
 
@@ -63,6 +76,9 @@ Requires Java 21 and Maven. Run from the directory that contains `tools.json`. E
 ```bash
 mvn package
 java -jar target/scanner-cli-tool-1.0-SNAPSHOT.jar nmap example.com
+
+# custom config directory
+java -Dscanner.config="/path/to/config/dir" -jar target/scanner-cli-tool-1.0-SNAPSHOT.jar nmap example.com
 ```
 
 **Quick local run:**
