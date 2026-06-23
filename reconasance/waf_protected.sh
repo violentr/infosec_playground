@@ -9,27 +9,31 @@ if [[ $# -eq 0 ]]; then
     echo "Usage: ./waf_protected file_with_hostnames"
     exit 1
 fi
-echo -e "Cleaning up .. "
 
-prefix="WAF"
-outputFile="$prefix-output_ips.txt"
 file=$1
+prefix="WAF"
+inputFile="$prefix-input.txt"
+outputFile="$prefix-output.txt"
 
-rm $outputFile 2>/dev/null
-rm $prefix-output.txt 2>/dev/null
-rm $prefix-real_ips.txt 2>/dev/null
-rm $prefix-raw_report.txt 2>/dev/null
-rm $prefix-report.txt 2>/dev/null
+echo -e "\n Cleanning up previous files .."
+rm $outputFile
+rm $inputFile
 
-echo -e "\nSTAGE 1: Checking for public domains"
+echo -e "\n Preparing data for the look up .."
 
-cat $file | httpx -probe | tee -a $prefix-output.txt
+cat  $file | sort -u | httpx -probe -ip | tee -a $inputFile
 
-echo -e "\nSTAGE 2: Saving data to $outputFile"
-cat output.txt | grep SUCCESS | cut -d " " -f1 | httpx -ip | tee -a $prefix-raw_report.txt
-cat raw_report.txt | cut -d "[" -f1 | cut -d "/" -f3 | httpx -ip > $outputFile
+#cat $file | httpx -probe | tee -a $outputFile
 
-cat $outputFile | cut -d "[" -f2 |tr "]" " " | sort -u > $prefix-real_ips.txt
+while read -r host
+do
+  success=$(echo $host| cut -d " " -f2 | tr "[]" " ")
 
-echo -e "\nSTAGE 3: Checking if ip sits behind WAF"
-while read -r ip;do orgName=$(curl -ks https://ipinfo.io/$ip | jq '.org'); echo "$line - $orgName" | tee -a $prefix-report.txt;done<$prefix-real_ips.txt
+  if [[ $success == *"SUCCESS"* ]]; then
+  ip=$(echo $host | cut -d " " -f3 | tr "[]" " " | tr -d ' ')
+  orgName=$(curl -ks https://ipinfo.io/$ip | jq '.org')
+  echo "$host $orgName" | tee -a $outputFile
+  fi
+done<$inputFile
+
+echo -e "\nData was saved to: $(pwd)/$outputFile"
