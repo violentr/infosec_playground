@@ -1,6 +1,6 @@
 package src.main.java.com.violentr;
 
-import java.io.IOException;
+import java.nio.file.Paths;
 
 public class Main {
     private static void validateHostname(String hostname) {
@@ -14,8 +14,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        // TODO: OPtion for loading tools.json file - PATH
-
         if (args.length != 2) {
             System.out.println("Usage: scanner <tool> <hostname>");
             System.out.println("Tools: nmap, sqlmap, ...");
@@ -23,17 +21,25 @@ public class Main {
         }
         String toolName = args[0];
         String hostname = args[1];
-
-        try{
+        try {
             validateHostname(hostname);
-            System.out.println("PATH: " + System.getProperty("user.dir"));
-            ScanTool scanTool = new ScanTool("tools.json");
+            String configPath = resolveConfigPath();
+            System.out.println("Config: " + configPath);
+            ScanTool scanTool = new ScanTool(configPath);
             scanTool.executeTool(toolName, hostname);
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             return;
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Error loading configuration: " + e.getMessage());
         }
+    }
+
+    private static String resolveConfigPath() {
+        String configDir = System.getProperty("scanner.config");
+        if (configDir == null || configDir.isBlank()) {
+            return "tools.json";
+        }
+        return Paths.get(configDir).resolve("tools.json").toString();
     }
 }
