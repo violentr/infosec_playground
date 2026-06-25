@@ -3,15 +3,6 @@ package src.main.java.com.violentr;
 import java.nio.file.Paths;
 
 public class Main {
-    private static void validateHostname(String hostname) {
-        if (hostname == null || hostname.isBlank()) {
-            throw new IllegalArgumentException("Hostname required");
-        }
-        // allow letters, digits, dots, hyphens only
-        if (!hostname.matches("[a-zA-Z0-9.-]+")) {
-            throw new IllegalArgumentException("Invalid hostname: " + hostname);
-        }
-    }
 
     public static void main(String[] args) {
         if (args.length != 2) {
@@ -22,11 +13,11 @@ public class Main {
         String toolName = args[0];
         String hostname = args[1];
         try {
-            validateHostname(hostname);
+            Host host = new Host(hostname);
             String configPath = resolveConfigPath();
             System.out.println("Config: " + configPath);
             ScanTool scanTool = new ScanTool(configPath);
-            scanTool.executeTool(toolName, hostname);
+            scanTool.executeTool(toolName, host);
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             return;
