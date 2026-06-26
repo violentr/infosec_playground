@@ -3,8 +3,9 @@ package src.main.java.com.violentr;
 import java.io.IOException;
 
 public class CommandRunner {
-    public void run(String[] cmd) {
+    public void run(Command command) {
         try {
+            String[] cmd = command.toArray();
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
             Process process = pb.start();

@@ -8,12 +8,12 @@ public class Tool {
         this.name = name;
         this.args = args;
     }
-    public String[] buildCommand(Host host) {
+    public Command buildCommand(Host host) {
      String[] resolved = new String[args.length];
      for (int i = 0; i < args.length; i++) {
          resolved[i] = args[i].replace("{hostname}", host.getValue() );
      }
-     return resolved;
+     return new Command(resolved);
     }
 
     public String getName() {
