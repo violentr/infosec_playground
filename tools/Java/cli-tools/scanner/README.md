@@ -95,3 +95,18 @@ java -cp "out:target/dependency/*" src.main.java.com.violentr.Main nmap scanme.n
 ```
 
 On Windows, use `;` instead of `:` in the classpath.
+
+## Testing
+
+Run the unit test suite:
+
+```bash
+mvn test
+```
+
+Run a single test class:
+
+```bash
+mvn -Dtest=HostTest test
+```
+
