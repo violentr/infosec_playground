@@ -24,9 +24,6 @@ public class BurpExtensionEntry implements BurpExtension {
         Logging log = montoyaApi.logging();
         log.logToOutput("Burp version " + montoyaApi.burpSuite().version());
         extensionLoad();
-        HttpRequest request = HttpRequest.httpRequestFromUrl("https://example.com");
-        HttpRequestResponse response = montoyaApi.http().sendRequest(request);
-        loggedHeaders(response, log);
         SwingUtilities.invokeLater(() -> createAndRegisterTab(montoyaApi.userInterface(), log));
     }
 
@@ -35,18 +32,9 @@ public class BurpExtensionEntry implements BurpExtension {
         montoyaApi.logging().logToOutput("extension loaded: " + NAME);
     }
 
-    public void loggedHeaders(HttpRequestResponse response, Logging log) {
-        HttpHeader userAgent = response.request().header("User-Agent");
-        HttpHeader server = response.response().header("Server");
-        log.logToOutput("status code: " + response.response().statusCode());
-        log.logToOutput("user agent: " + Optional.ofNullable(userAgent).map(HttpHeader::value).orElse("Not found"));
-        log.logToOutput("server: " + Optional.ofNullable(server).map(HttpHeader::value).orElse("Not found"));
-        log.logToOutput("response body: " + response.response().body());
-    }
-
     private void createAndRegisterTab(UserInterface ui, Logging log) {
         JPanel panel = new JPanel(new BorderLayout(6, 6));
-
+        String url = "https://example.com";
         JTextArea output = new JTextArea();
         output.setEditable(false);
         output.setLineWrap(true);
@@ -54,7 +42,6 @@ public class BurpExtensionEntry implements BurpExtension {
 
         JScrollPane scroll = new JScrollPane(output);
         panel.add(scroll, BorderLayout.CENTER);
-
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton sendBtn = new JButton("Send request");
         controls.add(sendBtn);
@@ -63,11 +50,11 @@ public class BurpExtensionEntry implements BurpExtension {
         // Button action: run HTTP request off the EDT
         sendBtn.addActionListener(e -> {
             sendBtn.setEnabled(false);
-            output.append("Starting request to example.com...\n");
+            output.append("Starting request to " + url + "...\n");
             // run network I/O off-EDT
             new Thread(() -> {
                 try {
-                    HttpRequest req = HttpRequest.httpRequestFromUrl("https://example.com");
+                    HttpRequest req = HttpRequest.httpRequestFromUrl(url);
                     HttpRequestResponse response = montoyaApi.http().sendRequest(req);
 
                     String status = String.valueOf(response.response().statusCode());
