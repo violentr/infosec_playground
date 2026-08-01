@@ -13,19 +13,40 @@ public class HandleHttpResponse {
     }
 
     public String getRequestHeader(String headerName) {
-        return  Optional.ofNullable(response.request().header(headerName)).map(HttpHeader::value).orElse("N/A");
+        if (response == null || response.request() == null){
+            return "N/A";
+        }
+        return  Optional.of(response.request()
+                .header(headerName))
+                .map(HttpHeader::value)
+                .orElse("N/A");
+    }
+    private boolean isResponseNull(){
+        return response == null || response.response() == null;
     }
 
     public String getResponseHeader(String headerName) {
-        return  Optional.ofNullable(response.response().header(headerName)).map(HttpHeader::value).orElse("N/A");
+        if (isResponseNull()){
+            return "N/A";
+        }
+        return  Optional.of(response.response()
+                .header(headerName))
+                .map(HttpHeader::value)
+                .orElse("N/A");
     }
 
     public String getBody(){
-        return Optional.ofNullable(response.response().body()).map(Object::toString).orElse("N/A");
+        if (isResponseNull()){
+            return "N/A";
+        }
+        return Optional.of(response.response()
+                .body())
+                .map(Object::toString)
+                .orElse("N/A");
     }
 
     public String getStatus(){
-        if (response == null || response.response() == null){
+        if (isResponseNull()){
             return "N/A";
         }
         return Optional.of(response.response().statusCode())
