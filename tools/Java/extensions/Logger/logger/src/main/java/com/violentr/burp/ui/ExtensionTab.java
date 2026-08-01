@@ -4,10 +4,11 @@ import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
-import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.logging.Logging;
 import burp.api.montoya.ui.UserInterface;
 import com.violentr.burp.Constants;
+import com.violentr.burp.http.HandleHttpRequest;
+import com.violentr.burp.http.HandleHttpResponse;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,12 +16,13 @@ import java.util.Optional;
 
 public class ExtensionTab {
     private final MontoyaApi montoyaApi;
-
+    private JPanel panel;
     public ExtensionTab(MontoyaApi api){
         this.montoyaApi = api;
     }
-    public void createAndRegisterTab(UserInterface ui) {
-        JPanel panel = new JPanel(new BorderLayout(6, 6));
+
+    private void createTab(UserInterface ui){
+        panel = new JPanel(new BorderLayout(6, 6));
         String url = "https://example.com";
         JTextArea output = new JTextArea();
         output.setEditable(false);
@@ -41,13 +43,13 @@ public class ExtensionTab {
             // run network I/O off-EDT
             new Thread(() -> {
                 try {
-                    HttpRequest req = HttpRequest.httpRequestFromUrl(url);
-                    HttpRequestResponse response = montoyaApi.http().sendRequest(req);
+                    HttpRequestResponse response = new HandleHttpRequest(montoyaApi).httpRequestFromString(url);
+                    HandleHttpResponse handleResponse = new HandleHttpResponse(response);
 
-                    String status = String.valueOf(response.response().statusCode());
-                    String body = response.response().body().toString();
-                    String userAgent = Optional.ofNullable(response.request().header("User-Agent")).map(HttpHeader::value).orElse("N/A");
-                    String server = Optional.ofNullable(response.response().header("Server")).map(HttpHeader::value).orElse("N/A");
+                    String status = handleResponse.getStatus();
+                    String body = handleResponse.getBody();
+                    String userAgent = handleResponse.getRequestHeader("User-Agent");
+                    String server = handleResponse.getResponseHeader("Server");
 
                     // update UI on EDT
                     SwingUtilities.invokeLater(() -> {
@@ -69,9 +71,12 @@ public class ExtensionTab {
                 }
             }).start();
         });
-
-        // Register the tab with Burp
-        Registration tabRegistration = ui.registerSuiteTab(Constants.NAME, panel);
-        // Optionally apply theme via montoyaApi.userInterface().applyThemeToComponent(panel);
+    }
+    private void registerTab(UserInterface ui, JPanel panel){
+        ui.registerSuiteTab(Constants.NAME, panel);
+    }
+    public void createAndRegisterTab(UserInterface ui) {
+        createTab(ui);
+        registerTab(ui, panel);
     }
 }
