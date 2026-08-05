@@ -1,8 +1,6 @@
 package com.violentr.burp.ui;
 
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.core.Registration;
-import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.logging.Logging;
 import burp.api.montoya.ui.UserInterface;
@@ -12,7 +10,6 @@ import com.violentr.burp.http.HandleHttpResponse;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Optional;
 
 public class ExtensionTab {
     private final MontoyaApi montoyaApi;

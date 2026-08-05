@@ -16,7 +16,7 @@ public class HandleHttpResponse {
         if (response == null || response.request() == null){
             return "N/A";
         }
-        return  Optional.of(response.request()
+        return  Optional.ofNullable(response.request()
                 .header(headerName))
                 .map(HttpHeader::value)
                 .orElse("N/A");
@@ -29,7 +29,7 @@ public class HandleHttpResponse {
         if (isResponseNull()){
             return "N/A";
         }
-        return  Optional.of(response.response()
+        return  Optional.ofNullable(response.response()
                 .header(headerName))
                 .map(HttpHeader::value)
                 .orElse("N/A");
@@ -39,19 +39,14 @@ public class HandleHttpResponse {
         if (isResponseNull()){
             return "N/A";
         }
-        return Optional.of(response.response()
-                .body())
-                .map(Object::toString)
-                .orElse("N/A");
+        return response.response().bodyToString();
     }
 
     public String getStatus(){
         if (isResponseNull()){
             return "N/A";
         }
-        return Optional.of(response.response().statusCode())
-                .map(Object::toString)
-                .orElse("N/A");
+        return String.valueOf(response.response().statusCode());
     }
 
 }
